@@ -1,0 +1,10 @@
+{{template "layout.html" .}}
+
+{{define "content"}}
+    <h1>{{.Headword}}</h1>
+    
+    <form action="/reveal" method="post">
+        <input type="hidden" name="front" value="{{.Headword}}">
+        <button type="submit">show answer</button>
+    </form>
+{{end}}
