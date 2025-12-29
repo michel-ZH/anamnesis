@@ -3,7 +3,6 @@ module anamnesis
 go 1.25.5
 
 require (
-	github.com/aws/aws-lambda-go v1.51.1
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1
 )
