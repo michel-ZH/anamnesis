@@ -1,3 +1,4 @@
+// api/index.go
 package main
 
 import (
@@ -11,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -290,7 +292,12 @@ func (app *application) handleGrade(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/review", http.StatusSeeOther)
 }
 
-func main() {
+var (
+	app  *application
+	once sync.Once
+)
+
+func initApp() {
 	cfg, err := loadDBConfigFromEnv()
 	if err != nil {
 		panic(fmt.Sprintf("Config error: %v", err))
@@ -305,21 +312,21 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("DB connect error: %v", err))
 	}
-	defer dbPool.Close()
-	tmpl := template.Must(template.ParseGlob("templates/*.html"))
+	tmpl := template.Must(template.ParseGlob("../templates/*.html")) // Adjust path if needed
 
-	app := &application{
+	app = &application{
 		db:   dbPool,
 		tmpl: tmpl,
 	}
-
-	http.HandleFunc("/review", app.handleReview)
-	http.HandleFunc("/reveal", app.handleReveal)
-	http.HandleFunc("/grade", app.handleGrade)
-
-	port := getenvDefault("PORT", "3000")
-	fmt.Printf("Listening on :%s\n", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		panic(err)
-	}
 }
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	once.Do(initApp)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/review", app.handleReview)
+	mux.HandleFunc("/reveal", app.handleReveal)
+	mux.HandleFunc("/grade", app.handleGrade)
+	mux.ServeHTTP(w, r)
+}
+
+func main() {}
