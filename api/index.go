@@ -1,8 +1,8 @@
-// api/index.go
 package handler
 
 import (
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"html/template"
@@ -298,6 +298,8 @@ var (
 	once sync.Once
 )
 
+var templatesFS embed.FS
+
 func initApp() {
 	cfg, err := loadDBConfigFromEnv()
 	if err != nil {
@@ -313,7 +315,7 @@ func initApp() {
 	if err != nil {
 		panic(fmt.Sprintf("DB connect error: %v", err))
 	}
-	tmpl := template.Must(template.ParseGlob("../templates/*.html")) // Adjust path if needed
+	tmpl := template.Must(template.New("").ParseFS(templatesFS, "*.html"))
 
 	app = &application{
 		db:   dbPool,
