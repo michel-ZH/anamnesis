@@ -298,6 +298,7 @@ var (
 	once sync.Once
 )
 
+//go:embed templates/*.html
 var templatesFS embed.FS
 
 func initApp() {
